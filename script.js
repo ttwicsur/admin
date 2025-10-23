@@ -31,7 +31,7 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
     if (user) {
         document.getElementById('message').textContent = "Success";
         document.getElementById('message').style.color = "green";
-        window.location.href = "UgadaiPapku13/index.html";
+        window.location.href = "UgadaiPapku13";
     } else {
         document.getElementById('message').textContent = "Wrong username or password.";
         document.getElementById('message').style.color = "red";
@@ -39,3 +39,4 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
 });
 
 console.log("Скрипт загружен!"); // Просто для проверки
+
