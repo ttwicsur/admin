@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🎃 Login</title>
+
+  <!-- Шрифты: заголовок в Creepster, остальное Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg: #09070c;
+      --panel: rgba(17, 13, 22, 0.75);
+      --accent: #ff7518;          /* тыквенно-оранжевый */
+      --accent-2: #a64dff;        /* фиолетовый неон */
+      --text: #e9e6f0;
+      --muted: #b9b2c8;
+      --danger: #ff4242;
+      --ring: 0 0 0 3px rgba(255,117,24,.25);
+      --radius: 16px;
+      --shadow-lg: 0 10px 40px rgba(0,0,0,.5);
+    }
+
+    *{ box-sizing:border-box }
+
+    html, body{
+      height:100%;
+    }
+
+    body{
+      margin:0;
+      font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 80% -10%, rgba(255,117,24,.18), transparent 60%),
+        radial-gradient(900px 500px at -10% 110%, rgba(166,77,255,.18), transparent 60%),
+        linear-gradient(#0a0710, #07050a 40%, #050308);
+      /* Если есть твой фон — раскомментируй строку ниже и обнови путь */
+      /* background-image: url('https://ttwicsur.github.io/img/backgroundHALLOWEEN.png'); 
+         background-size: cover; background-position: center; */
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+    }
+
+    /* Лёгкая зернистость для атмосферы */
+    .noise{
+      position:fixed; inset:0; pointer-events:none; z-index:1;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' opacity='0.06' width='100' height='100' viewBox='0 0 100 100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)'/%3E%3C/svg%3E");
+      mix-blend-mode: soft-light;
+    }
+
+    /* Ползущий туман */
+    .fog, .fog::after{
+      position:fixed; inset:-20%;
+      background:
+        radial-gradient(50% 30% at 20% 30%, rgba(255,255,255,.06), transparent 60%),
+        radial-gradient(40% 25% at 70% 60%, rgba(255,255,255,.05), transparent 60%),
+        radial-gradient(60% 35% at 40% 80%, rgba(255,255,255,.04), transparent 70%);
+      filter: blur(18px) saturate(0.8);
+      animation: fog-move 60s linear infinite;
+      opacity:.55;
+      pointer-events:none;
+      z-index:0;
+    }
+    .fog::after{
+      content:"";
+      animation-duration: 90s;
+      animation-direction: reverse;
+      opacity:.45;
+    }
+    @keyframes fog-move{
+      from{ transform: translateX(-6%) translateY(0) }
+      50%{ transform: translateX(6%) translateY(-2%) }
+      to{ transform: translateX(-6%) translateY(0) }
+    }
+
+    /* Летучие мыши (SVG) */
+    .bats{
+      position:fixed; inset:0; pointer-events:none; z-index:2;
+    }
+    .bat{
+      position:absolute; width:42px; height:20px; opacity:.85;
+      animation: fly 18s linear infinite;
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,.5));
+    }
+    .bat:nth-child(2){ width:34px; top:15%; left:-8%; animation-duration: 22s; animation-delay: -4s }
+    .bat:nth-child(3){ width:50px; top:70%; left:110%; animation-duration: 26s; animation-direction: reverse; animation-delay: -8s }
+    .bat:nth-child(4){ width:28px; top:35%; left:-12%; animation-duration: 28s; animation-delay: -2s }
+    @keyframes fly{
+      0%{ transform: translateX(-10vw) translateY(-2vh) scale(1) }
+      25%{ transform: translateX(25vw) translateY(2vh) scale(1.05) }
+      50%{ transform: translateX(55vw) translateY(-1vh) scale(1) }
+      75%{ transform: translateX(85vw) translateY(3vh) scale(1.05) }
+      100%{ transform: translateX(110vw) translateY(0) scale(1) }
+    }
+
+    .login-container{
+      position:relative;
+      width:min(92vw, 360px);
+      background: var(--panel);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255,117,24,.06) inset;
+      backdrop-filter: blur(10px) saturate(1.1);
+      padding: 24px 22px 20px;
+      z-index:3;
+    }
+
+    .brand{
+      display:flex; align-items:center; justify-content:center; gap:10px;
+      margin-bottom: 8px;
+    }
+    .brand img{
+      width:44px; height:44px; object-fit:contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,.5));
+    }
+    .brand .wordmark{
+      font-family: "Creepster", cursive;
+      font-size: 28px; line-height: 1;
+      color: var(--accent);
+      text-shadow:
+        0 0 6px rgba(255,117,24,.6),
+        0 0 18px rgba(255,117,24,.35);
+      letter-spacing: .5px;
+      animation: title-flicker 6s infinite steps(1, end);
+    }
+    @keyframes title-flicker{
+      0%, 100% { opacity: 1 }
+      8% { opacity: .7 }
+      9% { opacity: 1 }
+      10% { opacity: .65 }
+      11% { opacity: 1 }
+      55% { opacity: 1 }
+      56% { opacity: .85 }
+      57% { opacity: 1 }
+    }
+
+    h2{
+      margin: 0 0 14px;
+      font-family: "Creepster", cursive;
+      font-size: 32px;
+      color: var(--text);
+      text-align:center;
+      text-shadow:
+        0 0 10px rgba(166,77,255,.35),
+        0 0 24px rgba(166,77,255,.18);
+      letter-spacing:.5px;
+    }
+
+    form{
+      margin-top:10px;
+    }
+
+    label{
+      display:block;
+      font-size: 12px;
+      color: var(--muted);
+      margin: 12px 2px 6px;
+    }
+
+    input{
+      width:100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(7,6,10,.7);
+      color: var(--text);
+      outline: none;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+      transition: border-color .2s, box-shadow .2s, transform .06s;
+    }
+    input::placeholder{ color: #9c95ac }
+    input:focus{
+      border-color: var(--accent);
+      box-shadow: var(--ring);
+      transform: translateY(-1px);
+    }
+
+    button{
+      width:100%;
+      margin-top: 14px;
+      padding: 12px 14px;
+      font-weight: 600;
+      font-size: 15px;
+      color: #1a0f06;
+      background: linear-gradient(180deg, #ffa357, #ff7518);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow:
+        0 6px 18px rgba(255,117,24,.35),
+        inset 0 1px 0 rgba(255,255,255,.35);
+      transition: transform .06s ease, filter .2s;
+      will-change: transform;
+    }
+    button:hover{ filter: brightness(1.05) }
+    button:active{ transform: translateY(1px) }
+
+    .links{
+      margin-top: 12px;
+      text-align:center;
+      font-size: 13px;
+    }
+    .links a{
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(255,117,24,.6);
+    }
+    .links a:hover{
+      color:#ffd1b0; border-bottom-color:#ffd1b0;
+      text-shadow: 0 0 10px rgba(255,117,24,.35);
+    }
+
+    #message{
+      text-align:center;
+      margin-top: 12px;
+      min-height: 18px;
+      color: var(--danger);
+      font-size: 13px;
+      text-shadow: 0 0 8px rgba(255,66,66,.2);
+    }
+
+    /* Маленькая "паутинка" в углу */
+    .corner-web{
+      position:absolute; right:-8px; top:-8px; width:78px; height:78px; opacity:.2; z-index:-1;
+    }
+
+    /* Уважение к предпочтениям по анимациям */
+    @media (prefers-reduced-motion: reduce){
+      .fog, .fog::after, .bat{ animation: none !important }
+    }
+
+    /* ---- Стили для special.html блока (если используешь отдельную страницу) ---- */
+    .special-container{
+      background: var(--panel);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      width:min(92vw, 360px);
+      padding:22px;
+      margin: 100px auto 0;
+      color: var(--text);
+      z-index:3;
+    }
+    .special-container h2{
+      color: var(--accent);
+      font-family: "Creepster", cursive;
+      text-align:center;
+      margin:0 0 10px;
+    }
+    .special-container a{
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(255,117,24,.6);
+    }
+    .special-container a:hover{ color:#ffd1b0; border-bottom-color:#ffd1b0 }
+  </style>
+</head>
+<body>
+  <!-- Атмосфера -->
+  <div class="noise" aria-hidden="true"></div>
+  <div class="fog" aria-hidden="true"></div>
+
+  <!-- Летучие мыши -->
+  <div class="bats" aria-hidden="true">
+    <!-- SVG мыши (одна и та же форма) -->
+    <svg class="bat" viewBox="0 0 64 32" fill="currentColor">
+      <path d="M9 14c4 2 9 3 12-1 1-1 3-1 4 0 3 4 8 3 12 1 1-1 3-1 4 0 3 3 9 3 12 1-2 3-4 6-10 6-4 0-8-2-12-3-4 1-8 3-12 3-6 0-8-3-10-6z"/>
+    </svg>
+    <svg class="bat" viewBox="0 0 64 32" fill="currentColor">
+      <path d="M9 14c4 2 9 3 12-1 1-1 3-1 4 0 3 4 8 3 12 1 1-1 3-1 4 0 3 3 9 3 12 1-2 3-4 6-10 6-4 0-8-2-12-3-4 1-8 3-12 3-6 0-8-3-10-6z"/>
+    </svg>
+    <svg class="bat" viewBox="0 0 64 32" fill="currentColor">
+      <path d="M9 14c4 2 9 3 12-1 1-1 3-1 4 0 3 4 8 3 12 1 1-1 3-1 4 0 3 3 9 3 12 1-2 3-4 6-10 6-4 0-8-2-12-3-4 1-8 3-12 3-6 0-8-3-10-6z"/>
+    </svg>
+    <svg class="bat" viewBox="0 0 64 32" fill="currentColor">
+      <path d="M9 14c4 2 9 3 12-1 1-1 3-1 4 0 3 4 8 3 12 1 1-1 3-1 4 0 3 3 9 3 12 1-2 3-4 6-10 6-4 0-8-2-12-3-4 1-8 3-12 3-6 0-8-3-10-6z"/>
+    </svg>
+  </div>
+
+  <div class="login-container">
+    <svg class="corner-web" viewBox="0 0 100 100" aria-hidden="true">
+      <path d="M0 0 L100 0 L100 100" fill="none" stroke="white" stroke-opacity=".5" stroke-width=".6"/>
+      <path d="M0 0 C30 5, 55 5, 100 0" fill="none" stroke="white" stroke-opacity=".35" stroke-width=".5"/>
+      <path d="M0 0 C5 30, 5 55, 0 100" fill="none" stroke="white" stroke-opacity=".35" stroke-width=".5"/>
+      <path d="M0 0 C22 12, 60 18, 100 0" fill="none" stroke="white" stroke-opacity=".22" stroke-width=".45"/>
+      <path d="M0 0 C12 22, 18 60, 0 100" fill="none" stroke="white" stroke-opacity=".22" stroke-width=".45"/>
+    </svg>
+
+    <div class="brand">
+      <img src="https://ttwicsur.github.io/img/logo.png" alt="Логотип">
+      <div class="wordmark">Spooky Admin</div>
+    </div>
+
+    <h2>Enter the Crypt</h2>
+
+    <form id="loginForm">
+      <label for="username">Username</label>
+      <input id="username" name="username" type="text" placeholder="witch_master" required>
+
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" placeholder="••••••••" required>
+
+      <button type="submit">🎃 Entry</button>
+
+      <div class="links">
+        <a href="https://ttwicsur.github.io/warning/admin">⚠ Warning</a>
+      </div>
+    </form>
+
+    <p id="message" role="status" aria-live="polite"></p>
+
+    <noscript>Для работы с формой включите JavaScript в вашем браузере.</noscript>
+  </div>
+
+  <!-- Твой скрипт логина -->
+  <script src="https://ttwicsur.github.io/scripts/admin.js"></script>
+
+  <script>
+    // Небольшой «тематический» UX-штрих: случайные подсказки и сообщение об ошибке
+    (function(){
+      const hints = [
+        "👻 Tip: Не говори своё настоящее имя призракам.",
+        "🕸 Tip: Пароль не должен быть «pumpkin» 😉",
+        "🦇 Tip: Летучие мыши — друзья, не враги.",
+      ];
+      const user = document.getElementById('username');
+      user.placeholder = hints[Math.floor(Math.random()*hints.length)].replace('Tip: ', '');
+
+      const form = document.getElementById('loginForm');
+      const msg = document.getElementById('message');
+
+      // Если твой admin.js сам обрабатывает submit — убери обработчик ниже.
+      form.addEventListener('submit', function(e){
+        // Демо-обработчик для красивого эффекта (не мешает твоему admin.js, если он preventDefault)
+        msg.textContent = "…проверяем печати и прогоняем духов…";
+        setTimeout(()=>{ msg.textContent = "" }, 2500);
+      }, { capture: true });
+    })();
+  </script>
+</body>
+</html>
