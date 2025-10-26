@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Registration</title>
+  <style>
+    body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0b0a0f;color:#eee;font-family:system-ui,Arial}
+    .card{width:min(92vw,360px);background:#14121b;border:1px solid #262335;border-radius:14px;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,.45)}
+    h1{margin:0 0 12px;font-size:20px}
+    label{display:block;font-size:12px;color:#bbb;margin:10px 2px 6px}
+    input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2b2739;background:#0f0d14;color:#eee;outline:none}
+    input:focus{border-color:#ff7518;box-shadow:0 0 0 3px rgba(255,117,24,.25)}
+    button{width:100%;margin-top:14px;padding:12px 14px;font-weight:600;background:linear-gradient(180deg,#ffa357,#ff7518);border:none;border-radius:12px;color:#190f06;cursor:pointer}
+    .muted{color:#9b96a8;font-size:12px;margin-top:8px}
+    .err{color:#ff5757;margin-top:10px;min-height:18px}
+    .ok{color:#36d399}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Регистрация администратора</h1>
+    <p class="muted">Страница доступна только по секретной ссылке.</p>
+
+    <form id="regForm">
+      <label for="username">Username</label>
+      <input id="username" name="username" required placeholder="new_admin">
+
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" required placeholder="••••••••" minlength="4">
+
+      <button type="submit">Создать</button>
+      <div id="msg" class="err"></div>
+    </form>
+  </div>
+
+  <script>
+    // === Секрет для доступа (поменяй на ДЛИННУЮ строку и никому не палить!) ===
+    const ADMIN_REG_KEY = "replace-with-a-very-long-secret-key";
+
+    // === Настройки Telegram (те же что у тебя в admin.js) ===
+    const TELEGRAM_BOT_TOKEN = "8246751079:AAH3pTrauBUBQOH2wXm4K3cbDGhO2T321tg";
+    const TELEGRAM_CHAT_ID  = "5764625744";
+
+    // gate: пускаем только с правильным ключом
+    const urlKey = new URLSearchParams(location.search).get("key");
+    if (urlKey !== ADMIN_REG_KEY) {
+      document.body.innerHTML = "<div style='color:#ff5757;font-family:system-ui;padding:24px;text-align:center'>Access denied</div>";
+      throw new Error("Wrong key");
+    }
+
+    function sendLog(text){
+      try {
+        fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method:"POST", headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text, disable_notification: true })
+        });
+      } catch(_) {}
+    }
+
+    function mergeUsersToLocal(u){
+      const list = JSON.parse(localStorage.getItem("users") || "[]");
+      list.push(u);
+      localStorage.setItem("users", JSON.stringify(list));
+    }
+
+    document.getElementById("regForm").addEventListener("submit", (e)=>{
+      e.preventDefault();
+      const msg = document.getElementById("msg");
+      msg.textContent = "";
+
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+
+      if (!username || !password) { msg.textContent = "Заполни все поля"; return; }
+      if (password.length < 4) { msg.textContent = "Минимум 4 символа в пароле"; return; }
+
+      // сохраняем локально (на домене) и отправляем в TG для учёта/бэкапа
+      mergeUsersToLocal({ username, password });
+      sendLog(`🆕 [registration] Создан пользователь\n👤 ${username}\n🔑 ${password}\n🌐 ${location.origin}\n⏱ ${new Date().toISOString()}`);
+
+      msg.textContent = "Готово! Переадресация…";
+      msg.classList.remove("err"); msg.classList.add("ok");
+
+      // после регистрации → обычная страница
+      setTimeout(()=>{ window.location.href = "index.html"; }, 1200);
+    });
+  </script>
+</body>
+</html>
