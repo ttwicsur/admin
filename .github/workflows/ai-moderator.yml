@@ -1,0 +1,23 @@
+name: AI Moderator
+
+on:
+  issue_comment:
+    types: [created, edited]
+  issues:
+    types: [opened, edited, reopened]
+
+jobs:
+  moderate:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - name: AI Issue and Comment Moderator
+        uses: github/ai-moderator@v1.1.4
+        with:
+          # 🔑 Настройки (можно изменить под себя)
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Дополнительно можно указать:
+          # model: gpt-4o-mini
+          # block_threshold: 0.9
