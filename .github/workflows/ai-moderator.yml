@@ -1,23 +1,30 @@
 name: AI Moderator
-
 on:
-  issue_comment:
-    types: [created, edited]
   issues:
-    types: [opened, edited, reopened]
+    types: [opened]
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
 
 jobs:
-  moderate:
+  spam-detection:
     runs-on: ubuntu-latest
     permissions:
       issues: write
       pull-requests: write
+      models: read
+      contents: read
     steps:
-      - name: AI Issue and Comment Moderator
-        uses: github/ai-moderator@v1.1.4
+      - uses: actions/checkout@v4
+      - uses: github/ai-moderator@v1
         with:
-          # 🔑 Настройки (можно изменить под себя)
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          # Дополнительно можно указать:
-          # model: gpt-4o-mini
-          # block_threshold: 0.9
+          token: ${{ secrets.GITHUB_TOKEN }}
+          spam-label: 'spam'
+          ai-label: 'ai-generated'
+          minimize-detected-comments: true
+          # Built-in prompt configuration (all enabled by default)
+          enable-spam-detection: true
+          enable-link-spam-detection: true
+          enable-ai-detection: true
+          # custom-prompt-path: '.github/prompts/my-custom.prompt.yml'  # Optional
